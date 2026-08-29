@@ -175,7 +175,6 @@ const Analytics: React.FC<AnalyticsProps> = ({ data, loading, error, onRetry, ci
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           cityId,
-          model: 'qwen3.6',
           max_tokens: 500,
           temperature: 0.5,
           messages: [
@@ -190,7 +189,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ data, loading, error, onRetry, ci
       });
       const j = await r.json();
       if (!r.ok || !j?.success) {
-        throw new Error(j?.error || `AI Gateway error (HTTP ${r.status})`);
+        throw new Error(j?.error || `AI Agent error (HTTP ${r.status})`);
       }
       const content: string = j.content || j.reply || '';
       // Parse numbered bullets "1. ..." / "2. ..." / "3. ..."
@@ -207,7 +206,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ data, loading, error, onRetry, ci
     } catch (e: any) {
       setAiError(
         e?.message?.includes('502') || e?.message?.toLowerCase().includes('timeout')
-          ? 'AI Gateway timed out — please try again in 30 seconds.'
+          ? 'AI Agent timed out — please try again in 30 seconds.'
           : (e?.message || 'Failed to generate insights.')
       );
     } finally {

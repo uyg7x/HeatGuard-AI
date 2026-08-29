@@ -87,7 +87,6 @@ const AIChat: React.FC<AIChatProps> = ({ data, onAction, cityId = 'dallas' }) =>
         body: JSON.stringify({
           messages: apiMessages,
           cityId, // ← multi-city: route handler builds a live table for all 4 cities
-          model: 'qwen3.6',
           max_tokens: 500,
           temperature: 0.7,
         }),
