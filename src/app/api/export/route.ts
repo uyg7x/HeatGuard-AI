@@ -1,0 +1,105 @@
+// ============================================================
+// HeatGuard AI — API Route: Export Generator (PDF/CSV)
+// Real data export endpoint with zero mock data
+// ============================================================
+
+import { NextResponse } from 'next/server';
+
+export async function POST(req: Request) {
+  const startTime = Date.now();
+  let body: any;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ success: false, error: 'Invalid JSON request body' }, { status: 400 });
+  }
+
+  const { type, data, reportTitle } = body;
+
+  if (!data) {
+    return NextResponse.json({ success: false, error: 'No FortyGuard temperature data provided for export' }, { status: 400 });
+  }
+
+  if (type === 'csv') {
+    const rows: string[] = [];
+    rows.push('Type,Name/ID,Lat,Lng,Temperature_F,Risk_Level,Area_SqMi,Measured_At');
+
+    // Add main current temperature reading
+    if (data.temperature?.value !== undefined) {
+      rows.push(`Current,${data.location || 'Metro'},0,0,${data.temperature.value},${data.risk_level || 'N/A'},10,${data.measured_at || new Date().toISOString()}`);
+    }
+
+    // Add heatmap points
+    if (Array.isArray(data.heatmap_data)) {
+      data.heatmap_data.forEach((p: any, idx: number) => {
+        rows.push(`HeatmapCell,Cell_${idx + 1},${p.lat},${p.lng},${p.temperature},${p.temperature > 110 ? 'extreme' : p.temperature > 100 ? 'high' : 'moderate'},,${data.measured_at || ''}`);
+      });
+    }
+
+    // Add zones
+    if (Array.isArray(data.zones)) {
+      data.zones.forEach((z: any) => {
+        const centerLat = z.polygon?.[0]?.[0] || 0;
+        const centerLng = z.polygon?.[0]?.[1] || 0;
+        rows.push(`Zone,${z.name || z.id},${centerLat},${centerLng},${z.temperature},${z.risk_level || ''},${z.area_sq_mi || ''},${data.measured_at || ''}`);
+      });
+    }
+
+    // Add cooling centers
+    if (Array.isArray(data.cooling_centers)) {
+      data.cooling_centers.forEach((c: any) => {
+        rows.push(`CoolingShelter,${c.name},${c.lat},${c.lng},${c.ac_temperature},safe,,${data.measured_at || ''}`);
+      });
+    }
+
+    const csvContent = rows.join('\n');
+    const totalTime = Date.now() - startTime;
+    console.log(`[Export API] CSV generated with ${rows.length} rows in ${totalTime}ms`);
+
+    return NextResponse.json({ success: true, data: csvContent, latency: totalTime });
+  }
+
+  if (type === 'pdf') {
+    const lines: string[] = [];
+    lines.push('================================================================');
+    lines.push('HEATGUARD AI — URBAN CLIMATE INTELLIGENCE EXECUTIVE REPORT');
+    lines.push('================================================================');
+    lines.push(`Generated At: ${new Date().toISOString()}`);
+    lines.push(`Report Title: ${reportTitle || 'Heat Intelligence Summary'}`);
+    lines.push(`Location:     ${data.location || 'Metro Area'}`);
+    lines.push(`Data Source:  FortyGuard Temperature API® (2m altitude, 10 mi² resolution)`);
+    lines.push('----------------------------------------------------------------');
+    lines.push('');
+    lines.push('1. CURRENT CLIMATE METRICS');
+    lines.push(`   - Temperature:       ${data.temperature?.value !== undefined ? `${data.temperature.value.toFixed(1)}°F` : 'N/A'}`);
+    lines.push(`   - Risk Assessment:   ${(data.risk_level || 'UNKNOWN').toUpperCase()}`);
+    lines.push(`   - Air Temperature:   ${data.air_temperature !== undefined ? `${data.air_temperature.toFixed(1)}°F` : 'N/A'}`);
+    lines.push(`   - Surface Temp:      ${data.surface_temperature !== undefined ? `${data.surface_temperature.toFixed(1)}°F` : 'N/A'}`);
+    lines.push(`   - Relative Humidity: ${data.humidity !== undefined ? `${data.humidity.toFixed(0)}%` : 'N/A'}`);
+    lines.push(`   - Wind Speed:        ${data.wind_speed !== undefined ? `${data.wind_speed.toFixed(1)} mph` : 'N/A'}`);
+    lines.push(`   - UV Index:          ${data.uv_index !== undefined ? data.uv_index.toFixed(1) : 'N/A'}`);
+    lines.push('');
+    lines.push('2. GEOSPATIAL COVERAGE & ZONES');
+    lines.push(`   - Heatmap Cells Tracked: ${data.heatmap_data?.length || 0}`);
+    lines.push(`   - Micro-Zones Modeled:   ${data.zones?.length || 0}`);
+    lines.push(`   - Cooling Shelters:      ${data.cooling_centers?.length || 0}`);
+    lines.push(`   - Vulnerable Facilities: ${data.vulnerable_facilities?.length || 0}`);
+    lines.push('');
+    lines.push('3. ACTIONABLE POLICY RECOMMENDATIONS');
+    lines.push('   - Activate urban heat mitigation protocols for high-risk zones.');
+    lines.push('   - Ensure 24/7 cooling center availability during peak temperature windows.');
+    lines.push('   - Deploy targeted hydration stations along non-shaded transit routes.');
+    lines.push('   - Issue public health notices for elderly and sensitive populations.');
+    lines.push('');
+    lines.push('================================================================');
+    lines.push('CONFIDENTIAL — GENERATED BY HEATGUARD AI FOR CITY OFFICIALS');
+    lines.push('================================================================');
+
+    const totalTime = Date.now() - startTime;
+    console.log(`[Export API] Text/PDF report generated in ${totalTime}ms`);
+
+    return NextResponse.json({ success: true, data: lines.join('\n'), latency: totalTime });
+  }
+
+  return NextResponse.json({ success: false, error: 'Invalid export type. Must be csv or pdf.' }, { status: 400 });
+}
