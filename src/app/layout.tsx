@@ -15,12 +15,12 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'HeatGuard AI — Urban Climate Intelligence Platform',
+  title: 'HeatGuard AI',
   description: 'Real-time hyperlocal heat intelligence for resilient cities. Powered by FortyGuard Temperature API and AI Agent tools.',
   keywords: ['heat intelligence', 'urban climate', 'resilient cities', 'climate tech', 'AI agents'],
   authors: [{ name: 'HeatGuard AI Team' }],
   openGraph: {
-    title: 'HeatGuard AI — Urban Climate Intelligence Platform',
+    title: 'HeatGuard AI',
     description: 'Real-time hyperlocal heat intelligence for resilient cities.',
     type: 'website',
   },
