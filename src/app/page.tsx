@@ -501,7 +501,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-center gap-4 flex-wrap">
             <span>HeatGuard AI v1.0.0</span>
             <span>•</span>
-            <span>Powered by FortyGuard Temperature API + CoE AI Gateway (Qwen3.6)</span>
+            <span>Powered by FortyGuard Temperature API + Autonomous AI Agent</span>
             <span>•</span>
             <label className="flex items-center gap-1.5 cursor-pointer">
               <input

@@ -228,7 +228,7 @@ const AIChat: React.FC<AIChatProps> = ({ data, onAction, cityId = 'dallas' }) =>
         </div>
         <div className="flex-1">
           <h3 className="text-sm font-semibold text-slate-900">HeatGuard AI Agent</h3>
-          <div className="text-[10px] text-slate-500 uppercase tracking-wider">Powered by Qwen3.6 · {data?.location || 'Hyperlocal'}</div>
+          <div className="text-[10px] text-slate-500 uppercase tracking-wider">Powered by Autonomous AI Agent · {data?.location || 'Hyperlocal'}</div>
         </div>
         <div className="flex items-center gap-1.5 text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-2 py-1 rounded-full border border-emerald-200">
           <span className="relative flex h-2 w-2">
