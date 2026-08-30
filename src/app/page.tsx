@@ -81,10 +81,8 @@ const Header: React.FC<{
   refreshing: boolean;
   lastFetched: number | null;
   latency?: number;
-  autoRefresh: boolean;
-  onToggleAutoRefresh: () => void;
   upstreamFallback: { status: number; message: string } | null;
-}> = ({ data, locale, setLocale, onRefresh, refreshing, lastFetched, latency, autoRefresh, onToggleAutoRefresh, upstreamFallback }) => {
+}> = ({ data, locale, setLocale, onRefresh, refreshing, lastFetched, latency, upstreamFallback }) => {
   const risk = data ? getRiskLevelInfo(data.risk_level || 'safe') : null;
   const temp = data?.temperature?.value;
   return (
@@ -155,22 +153,6 @@ const Header: React.FC<{
           </select>
           <Globe className="w-3.5 h-3.5 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400" />
         </div>
-
-        {/* Auto-refresh toggle */}
-        <button
-          type="button"
-          onClick={onToggleAutoRefresh}
-          aria-pressed={autoRefresh}
-          aria-label={autoRefresh ? 'Disable auto-refresh' : 'Enable auto-refresh'}
-          title={autoRefresh ? 'Auto-refresh ON (every 60s)' : 'Auto-refresh OFF'}
-          className={`px-2.5 py-1.5 rounded-lg border text-[10px] font-bold uppercase tracking-wider transition-colors ${
-            autoRefresh
-              ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
-              : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
-          }`}
-        >
-          {autoRefresh ? '● Live' : '○ Manual'}
-        </button>
 
         {/* Soft upstream-fallback pill (NOT a blocking error) */}
         {upstreamFallback && (
@@ -255,12 +237,7 @@ export default function DashboardPage() {
   const [lastFetched, setLastFetched] = useState<number | null>(null);
   const [locale, setLocale] = useState<LocaleCode>('en');
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
-  // Auto-refresh defaults to OFF to avoid hammering a dead paid endpoint
-  // when FortyGuard is in a 402/401 state. The header has a manual refresh
-  // button and a toggle for power users.
-  const [autoRefresh, setAutoRefresh] = useState(false);
   const [upstreamFallback, setUpstreamFallback] = useState<{ status: number; message: string } | null>(null);
-  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   // Mirror the latest error in a ref so the polling effect can read it
   // WITHOUT re-running every time `error` changes (which would create an
   // infinite re-fetch loop).
@@ -306,33 +283,18 @@ export default function DashboardPage() {
     }
   }, [cityId]);
 
-  // Initial fetch + (optional) polling every 60s.
-  // CRITICAL: only depend on [cityId, autoRefresh]. Including `error` here
-  // would re-run the effect every fetch and create an infinite re-fetch loop
-  // when the upstream is in a 4xx state. The poll loop itself checks the
-  // latest error via errorRef before each tick.
+  // Permanent auto-refresh every 60s.
   useEffect(() => {
     fetchData();
-    if (pollRef.current) {
-      clearInterval(pollRef.current);
-      pollRef.current = null;
-    }
-    if (autoRefresh) {
-      pollRef.current = setInterval(() => {
-        const e = errorRef.current;
-        const recoverable = !e || (e.httpStatus !== 401 && e.httpStatus !== 402 && e.httpStatus !== 403 && e.httpStatus !== 429);
-        if (!recoverable) {
-          if (pollRef.current) {
-            clearInterval(pollRef.current);
-            pollRef.current = null;
-          }
-          return;
-        }
+    const t = setInterval(() => {
+      const e = errorRef.current;
+      const recoverable = !e || (e.httpStatus !== 401 && e.httpStatus !== 402 && e.httpStatus !== 403 && e.httpStatus !== 429);
+      if (recoverable) {
         fetchData();
-      }, 60_000);
-    }
-    return () => { if (pollRef.current) clearInterval(pollRef.current); };
-  }, [fetchData, autoRefresh]);
+      }
+    }, 60_000);
+    return () => clearInterval(t);
+  }, [fetchData]);
 
   // Surface a friendly, non-technical banner for billing failures so the
   // user understands WHY the dashboard shows "no data" instead of a raw 402.
@@ -410,7 +372,7 @@ export default function DashboardPage() {
               <BillingBlockedCard
                 status={error.httpStatus}
                 raw={error.rawResponse}
-                onRetry={() => { setAutoRefresh(true); fetchData(true); }}
+                onRetry={() => { fetchData(true); }}
               />
             )}
             <HeatCore {...common} lastFetched={lastFetched} cityId={cityId} cityName={city.name} />
@@ -448,8 +410,6 @@ export default function DashboardPage() {
         refreshing={refreshing}
         lastFetched={lastFetched}
         latency={latency}
-        autoRefresh={autoRefresh}
-        onToggleAutoRefresh={() => setAutoRefresh((v) => !v)}
         upstreamFallback={upstreamFallback}
       />
 
@@ -502,16 +462,6 @@ export default function DashboardPage() {
             <span>HeatGuard AI v1.0.0</span>
             <span>•</span>
             <span>Powered by FortyGuard Temperature API + Autonomous AI Agent</span>
-            <span>•</span>
-            <label className="flex items-center gap-1.5 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={autoRefresh}
-                onChange={(e) => setAutoRefresh(e.target.checked)}
-                className="accent-orange-500"
-              />
-              <span>Auto-refresh (60s)</span>
-            </label>
           </div>
         </footer>
       </main>
