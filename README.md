@@ -1,4 +1,4 @@
-# 🛡️ HeatGuard AI — Enterprise Urban Climate Intelligence Platform
+#  HeatGuard AI — Enterprise Urban Climate Intelligence Platform
 
 > **FortyGuard Global AI Hackathon '26 Submission**  
 > **Combining Track 01 (Resilient Cities & Infrastructure) & Track 06 (AI Agent Tools)**
@@ -7,7 +7,7 @@ HeatGuard AI is a $1M enterprise-grade climate-tech SaaS platform engineered for
 
 ---
 
-## 🌟 Core Highlights & Architectural Principles
+##  Core Highlights & Architectural Principles
 
 1. **Zero Mock Data Policy**  
    - Every single metric, zone, time-series timestamp, and heatmap point is derived exclusively from real API responses.
@@ -29,7 +29,7 @@ HeatGuard AI is a $1M enterprise-grade climate-tech SaaS platform engineered for
 
 ---
 
-## 📊 Core Dashboard Tabs (10 Dashboard Views)
+##  Core Dashboard Tabs (10 Dashboard Views)
 
 1. **Heat Intelligence Core**: Temperature hero display (°F), risk level badge (Safe / Moderate / High / Extreme), measurement altitude (2m), and spatial resolution (10 mi²).
 2. **Heatmap Overlay**: Interactive thermal map with continuous color scale (Green → Yellow → Orange → Red) and live opacity controls.
@@ -44,7 +44,7 @@ HeatGuard AI is a $1M enterprise-grade climate-tech SaaS platform engineered for
 
 ---
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### Prerequisites
 
@@ -87,7 +87,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## 🔒 Security & Performance
+##  Security & Performance
 
 - **Security Headers**: Configured in `next.config.mjs` (X-Frame-Options: DENY, X-Content-Type-Options: nosniff, Referrer-Policy).
 - **Accessibility (WCAG 2.1 AA)**: Full keyboard accessibility, ARIA live regions for streaming chat & alerts, high-contrast color ratios, and reduced motion support.
@@ -95,7 +95,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## 📜 License
+##  License
 
 Created for the FortyGuard Global AI Hackathon '26.
 # HeatGuard-AI
